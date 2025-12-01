@@ -1,0 +1,86 @@
+.registro-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+  font-family: 'Segoe UI', sans-serif;
+  padding: 20px;
+}
+
+.registro-box {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+
+.registro-title {
+  color: #0056b3;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+/* formulario */
+.registro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  text-align: left;
+}
+
+/* Columnas completas */
+.col-full {
+  grid-column: 1 / -1;
+}
+
+/* Labels */
+.registro-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Inputs */
+.registro-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+/* BOTÓN PRINCIPAL */
+.registro-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #0056b3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-top: 20px;
+  transition: background 0.2s;
+}
+
+.registro-button:hover {
+  background-color: #004494;
+}
+
+/* Botón Volver */
+.registro-back {
+  margin-top: 15px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  text-decoration: underline;
+}
