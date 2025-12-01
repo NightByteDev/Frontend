@@ -13,7 +13,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3000/api/admin/login', {
+      const response = await axios.post('https://api-lonja-backend.onrender.com/api/admin/login', {
         correo,
         password
       });
@@ -34,7 +34,7 @@ const Login = () => {
 
       if (error.response && error.response.status === 404) {
         try {
-          const responseComprador = await axios.post('http://localhost:3000/api/compradores/login', {
+          const responseComprador = await axios.post('https://api-lonja-backend.onrender.com/api/compradores/login', {
             correo,
             password
           });

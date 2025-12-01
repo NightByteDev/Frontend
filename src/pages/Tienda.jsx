@@ -21,7 +21,7 @@ const Tienda = () => {
 
     const fetchProductos = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/especies');
+        const response = await axios.get('https://api-lonja-backend.onrender.com/api/especies');
         setProductos(response.data);
         setLoading(false);
       } catch (error) {
@@ -98,7 +98,7 @@ const Tienda = () => {
           id_lte: producto.id_lte
         };
 
-        await axios.post('http://localhost:3000/api/compras', datosVenta);
+        await axios.post('https://api-lonja-backend.onrender.com/api/compras', datosVenta);
 
         Swal.fire({
           icon: 'success',

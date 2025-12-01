@@ -19,7 +19,7 @@ const Lotes = () => {
 
   const cargarLotes = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/lotes');
+      const response = await axios.get('https://api-lonja-backend.onrender.com/api/lotes');
       setLotes(response.data);
       setLoading(false);
     } catch (error) {
@@ -58,10 +58,10 @@ const Lotes = () => {
 
     try {
       if (formData.id_lte) {
-        await axios.put(`http://localhost:3000/api/lotes/${formData.id_lte}`, formData);
+        await axios.put(`https://api-lonja-backend.onrender.com/api/lotes/${formData.id_lte}`, formData);
         Swal.fire('Actualizado', 'Lote modificado correctamente', 'success');
       } else {
-        await axios.post('http://localhost:3000/api/lotes', formData);
+        await axios.post('https://api-lonja-backend.onrender.com/api/lotes', formData);
         Swal.fire('Guardado', 'Lote registrado correctamente', 'success');
       }
       cargarLotes();
@@ -75,7 +75,7 @@ const Lotes = () => {
   const handleEliminar = async (id) => {
     if (await Swal.fire({ title: '¿Borrar lote?', text: "Si hay productos asociados a este lote, no se podrá borrar.", icon: 'warning', showCancelButton: true }).then(r => r.isConfirmed)) {
       try {
-        await axios.delete(`http://localhost:3000/api/lotes/${id}`);
+        await axios.delete(`https://api-lonja-backend.onrender.com/api/lotes/${id}`);
         Swal.fire('Eliminado', '', 'success');
         cargarLotes();
       } catch (error) {

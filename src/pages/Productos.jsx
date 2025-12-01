@@ -26,9 +26,9 @@ const Productos = () => {
   const cargarDatos = async () => {
     try {
       const [resProd, resTipos, resLotes] = await Promise.all([
-        axios.get('http://localhost:3000/api/especies'),
-        axios.get('http://localhost:3000/api/tipos'),
-        axios.get('http://localhost:3000/api/lotes')
+        axios.get('https://api-lonja-backend.onrender.com/api/especies'),
+        axios.get('https://api-lonja-backend.onrender.com/api/tipos'),
+        axios.get('https://api-lonja-backend.onrender.com/api/lotes')
       ]);
 
       setProductos(resProd.data);
@@ -107,9 +107,9 @@ const Productos = () => {
       });
 
       if (formData.id_epe) {
-        await axios.put(`http://localhost:3000/api/especies/${formData.id_epe}`, dataToSend);
+        await axios.put(`https://api-lonja-backend.onrender.com/api/especies/${formData.id_epe}`, dataToSend);
       } else {
-        await axios.post('http://localhost:3000/api/especies', dataToSend);
+        await axios.post('https://api-lonja-backend.onrender.com/api/especies', dataToSend);
       }
 
       Swal.fire({
@@ -141,7 +141,7 @@ const Productos = () => {
   const handleEliminar = async (id) => {
     if (await Swal.fire({ title: '¿Borrar producto?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Borrar', cancelButtonText: 'Cancelar' }).then(r => r.isConfirmed)) {
       try {
-        await axios.delete(`http://localhost:3000/api/especies/${id}`);
+        await axios.delete(`https://api-lonja-backend.onrender.com/api/especies/${id}`);
         Swal.fire('Eliminado', '', 'success');
         cargarDatos();
       } catch (error) {

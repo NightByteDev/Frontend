@@ -13,7 +13,7 @@ const Compradores = () => {
 
   const cargarCompradores = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/compradores');
+      const response = await axios.get('https://api-lonja-backend.onrender.com/api/compradores');
       setCompradores(response.data);
       setLoading(false);
     } catch (error) {
@@ -48,7 +48,7 @@ const Compradores = () => {
 
     if (result.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:3000/api/compradores/${id}`);
+        await axios.delete(`https://api-lonja-backend.onrender.com/api/compradores/${id}`);
         Swal.fire(
           '¡Eliminado!',
           'El comprador ha sido eliminado.',
@@ -72,7 +72,7 @@ const Compradores = () => {
   const handleGuardarCambios = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:3000/api/compradores/${editingUser.codigo_cpr}`, editingUser);
+      await axios.put(`https://api-lonja-backend.onrender.com/api/compradores/${editingUser.codigo_cpr}`, editingUser);
       Swal.fire('Actualizado', 'Datos actualizados correctamente.', 'success');
       setEditingUser(null);
       cargarCompradores();

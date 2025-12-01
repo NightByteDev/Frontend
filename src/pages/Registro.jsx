@@ -25,7 +25,7 @@ const Registro = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3000/api/compradores', formData);
+      await axios.post('https://api-lonja-backend.onrender.com/api/compradores', formData);
       alert('¡Registro exitoso! Ahora puedes iniciar sesión como Comprador.');
       navigate('/login');
     } catch (error) {

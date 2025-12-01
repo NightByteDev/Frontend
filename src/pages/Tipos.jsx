@@ -13,7 +13,7 @@ const Tipos = () => {
 
   const cargarTipos = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/tipos');
+      const response = await axios.get('https://api-lonja-backend.onrender.com/api/tipos');
       setTipos(response.data);
       setLoading(false);
     } catch (error) {
@@ -32,7 +32,7 @@ const Tipos = () => {
     if (!nuevoTipo.trim()) return;
 
     try {
-      await axios.post('http://localhost:3000/api/tipos', { nombre: nuevoTipo });
+      await axios.post('https://api-lonja-backend.onrender.com/api/tipos', { nombre: nuevoTipo });
       Swal.fire('Guardado', 'Tipo creado correctamente', 'success');
       setNuevoTipo('');
       setShowModal(false);
@@ -45,7 +45,7 @@ const Tipos = () => {
   const handleEliminar = async (id) => {
     if (await Swal.fire({ title: '¿Borrar tipo?', text: "Si hay productos de este tipo, no se podrá borrar.", icon: 'warning', showCancelButton: true }).then(r => r.isConfirmed)) {
       try {
-        await axios.delete(`http://localhost:3000/api/tipos/${id}`);
+        await axios.delete(`https://api-lonja-backend.onrender.com/api/tipos/${id}`);
         Swal.fire('Eliminado', '', 'success');
         cargarTipos();
       } catch (error) {

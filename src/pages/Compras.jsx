@@ -15,7 +15,7 @@ const Compras = () => {
 
   const cargarCompras = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/compras');
+      const response = await axios.get('https://api-lonja-backend.onrender.com/api/compras');
       setCompras(response.data);
       setLoading(false);
     } catch (error) {
@@ -42,7 +42,7 @@ const Compras = () => {
 
     if (confirm.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:3000/api/compras/${id}`);
+        await axios.delete(`https://api-lonja-backend.onrender.com/api/compras/${id}`);
         Swal.fire('Eliminado', 'Registro eliminado correctamente.', 'success');
         cargarCompras();
       } catch (error) {
