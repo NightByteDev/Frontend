@@ -11,6 +11,19 @@ const Compradores = () => {
   const [busqueda, setBusqueda] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const usuarioGuardado = localStorage.getItem('usuario');
+    if (!usuarioGuardado) {
+      navigate('/');
+      return; 
+    }
+    const rol = localStorage.getItem('rol');
+    if (rol !== 'admin') {
+      navigate('/tienda'); 
+    }
+
+  }, [navigate]);
+
   const cargarCompradores = async () => {
     try {
       const response = await axios.get('https://api-lonja-backend.onrender.com/api/compradores');

@@ -12,6 +12,19 @@ const Productos = () => {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const usuarioGuardado = localStorage.getItem('usuario');
+    if (!usuarioGuardado) {
+      navigate('/');
+      return;
+    }
+    const rol = localStorage.getItem('rol');
+    if (rol !== 'admin') {
+      navigate('/tienda'); 
+    }
+
+  }, [navigate]);
+
   const [formData, setFormData] = useState({
     id_epe: null,
     nombre: '',

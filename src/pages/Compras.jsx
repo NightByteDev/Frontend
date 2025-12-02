@@ -4,30 +4,95 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import './Compras.css';
 
+
+
 const Compras = () => {
   const [compras, setCompras] = useState([]);
   const [loading, setLoading] = useState(true);
   
   const [facturaSeleccionada, setFacturaSeleccionada] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showModalFactura, setShowModalFactura] = useState(false);
+  
+  const [showModalReporte, setShowModalReporte] = useState(false);
+  const [reporteData, setReporteData] = useState([]);
+
+  const [showModalDetallesDia, setShowModalDetallesDia] = useState(false);
+  const [comprasDelDia, setComprasDelDia] = useState([]);
+  const [fechaSeleccionada, setFechaSeleccionada] = useState('');
 
   const navigate = useNavigate();
 
-  const cargarCompras = async () => {
+  useEffect(() => {
+    const usuarioGuardado = localStorage.getItem('usuario');
+    if (!usuarioGuardado) {
+      navigate('/');
+      return;
+    }
+    const rol = localStorage.getItem('rol');
+    if (rol !== 'admin') {
+      navigate('/tienda'); 
+    }
+
+  }, [navigate]);
+
+  const cargarCompras = async (silencioso = false) => {
     try {
       const response = await axios.get('https://api-lonja-backend.onrender.com/api/compras');
       setCompras(response.data);
-      setLoading(false);
+      if (!silencioso) setLoading(false);
     } catch (error) {
       console.error(error);
-      Swal.fire('Error', 'No se pudo cargar el historial de ventas', 'error');
-      setLoading(false);
+      if (!silencioso) {
+        Swal.fire('Error', 'No se pudo cargar el historial de ventas', 'error');
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
     cargarCompras();
+    
+    // Actualización automática cada 5 segundos
+    const intervalo = setInterval(() => {
+      cargarCompras(true); 
+    }, 5000);
+
+    return () => clearInterval(intervalo);
   }, []);
+
+  const generarReporte = () => {
+    const reporte = compras.reduce((acc, compra) => {
+      const fechaKey = new Date(compra.fecha).toLocaleDateString('es-MX');
+      
+      if (!acc[fechaKey]) {
+        acc[fechaKey] = { 
+          fecha: fechaKey, 
+          totalVentas: 0,
+          listaCompras: []
+        };
+      }
+      
+      acc[fechaKey].totalVentas += 1;
+      acc[fechaKey].listaCompras.push(compra);
+      
+      return acc;
+    }, {});
+
+    const arrayReporte = Object.values(reporte).sort((a, b) => {
+       const dateA = new Date(a.fecha.split('/').reverse().join('-'));
+       const dateB = new Date(b.fecha.split('/').reverse().join('-'));
+       return dateB - dateA; 
+    });
+
+    setReporteData(arrayReporte);
+    setShowModalReporte(true);
+  };
+
+  const verDetallesDia = (dia) => {
+    setFechaSeleccionada(dia.fecha);
+    setComprasDelDia(dia.listaCompras);
+    setShowModalDetallesDia(true);
+  };
 
   const handleEliminar = async (id) => {
     const confirm = await Swal.fire({
@@ -53,10 +118,9 @@ const Compras = () => {
 
   const verFactura = (compra) => {
     setFacturaSeleccionada(compra);
-    setShowModal(true);
+    setShowModalFactura(true);
   };
 
-  // Helper para formato de fecha
   const formatearFecha = (fecha) => {
     if (!fecha) return 'Fecha desconocida';
     return new Date(fecha).toLocaleString('es-MX', {
@@ -65,7 +129,6 @@ const Compras = () => {
     });
   };
 
-  // Helper para imágenes
   const getImgUrl = (img) => {
     if (!img) return 'https://via.placeholder.com/100x100?text=Sin+Foto';
     if (img.startsWith('http')) return img; 
@@ -76,7 +139,19 @@ const Compras = () => {
     <div className="compras-container">
       <div className="admin-header">
         <h1>Historial de Ventas</h1>
-        <button onClick={() => navigate('/menu')} className="btn-volver">← Volver al Menú</button>
+        
+        <div style={{display: 'flex', gap: '10px'}}>
+            <button 
+              onClick={generarReporte} 
+              className="btn-reporte-dia" 
+              style={{
+                backgroundColor: '#27ae60', color: 'white', border: 'none', 
+                padding: '8px 15px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold'
+              }}>
+              Reportes Diarios
+            </button>
+            <button onClick={() => navigate('/menu')} className="btn-volver">← Volver al Menú</button>
+        </div>
       </div>
 
       {loading ? <p style={{textAlign:'center'}}>Cargando reportes...</p> : (
@@ -95,13 +170,10 @@ const Compras = () => {
             </thead>
             <tbody>
               {compras.map((c, index) => {
-              
                 const compradorNombre = c.Comprador ? `${c.Comprador.nombre} ${c.Comprador.apellido_paterno}` : 'Cliente Eliminado';
-
                 const lote = c.Lote || {}; 
                 const especies = lote.Especies || [];
                 const producto = especies.length > 0 ? especies[0] : null;
-                
                 const nombreProducto = producto ? producto.nombre : (c.Lote ? `Lote #${c.id_lte}` : 'Producto no disponible');
                 const imgProducto = producto ? producto.imagen : null;
 
@@ -138,11 +210,82 @@ const Compras = () => {
         </div>
       )}
 
-      {showModal && facturaSeleccionada && (
+      {showModalReporte && (
+        <div className="modal-overlay">
+          <div className="modal-content-factura" style={{maxWidth: '600px', padding: '20px'}}>
+            <h2 style={{color:'#0056b3', textAlign:'center', marginBottom:'20px'}}>Reporte de Ventas por Día</h2>
+            
+            <table className="tabla-compras" style={{width: '100%', minWidth: 'auto'}}>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Ventas Realizadas</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reporteData.map((dia, idx) => (
+                  <tr key={idx}>
+                    <td>{dia.fecha}</td>
+                    <td>{dia.totalVentas}</td>
+                    <td>
+                        <button 
+                            className="btn-ver" 
+                            onClick={() => verDetallesDia(dia)}
+                            style={{fontSize: '0.8rem', padding: '5px 10px'}}>
+                            Ver Detalles
+                        </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div style={{textAlign:'center', marginTop:'20px'}}>
+              <button className="btn-cerrar" onClick={() => setShowModalReporte(false)}>Cerrar Reporte</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showModalDetallesDia && (
+        <div className="modal-overlay" style={{zIndex: 2100}}>
+            <div className="modal-content-factura" style={{maxWidth: '700px', padding: '20px'}}>
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'15px', borderBottom:'1px solid #eee', paddingBottom:'10px'}}>
+                    <h2 style={{color:'#0056b3', margin:0}}>Ventas del {fechaSeleccionada}</h2>
+                    <button className="btn-cerrar" onClick={() => setShowModalDetallesDia(false)} style={{padding:'5px 10px'}}>X</button>
+                </div>
+
+                <table className="tabla-compras" style={{width: '100%', minWidth: 'auto', fontSize:'0.9rem'}}>
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Cliente</th>
+                            <th>Producto</th>
+                            <th>Lote</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {comprasDelDia.map((c) => (
+                            <tr key={c.id_cmp}>
+                                <td>{new Date(c.fecha).toLocaleTimeString()}</td>
+                                <td>{c.Comprador?.nombre} {c.Comprador?.apellido_paterno}</td>
+                                <td>{c.Lote?.Especies?.[0]?.nombre || 'N/A'}</td>
+                                <td>#{c.id_lte}</td>
+                                <td style={{fontWeight:'bold', color:'#27ae60'}}>${parseFloat(c.precio_total).toFixed(2)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      )}
+
+      {showModalFactura && facturaSeleccionada && (
         <div className="modal-overlay">
           <div className="modal-content-factura">
-            
-            <div className="hoja-factura" id="factura-impresa">
+            <div className="hoja-factura">
               <div className="factura-header">
                 <h2>Lonja de Veracruz</h2>
                 <p>Fecha de Emisión: {formatearFecha(facturaSeleccionada.fecha)}</p>
@@ -152,9 +295,9 @@ const Compras = () => {
               <div className="factura-info">
                 <div className="info-grupo">
                   <h4>Datos del Cliente:</h4>
-                  <p>{facturaSeleccionada.Comprador?.nombre || 'Consumidor'} {facturaSeleccionada.Comprador?.apellido_paterno || 'N/A'} {facturaSeleccionada.Comprador?.apellido_materno || 'N/A'}</p>
-                  <p>{facturaSeleccionada.Comprador?.correo || 'Sin correo'}</p>
-                  <p>{facturaSeleccionada.Comprador?.direccion || 'Sin dirección registrada'}</p>
+                  <p>{facturaSeleccionada.Comprador?.nombre || 'N/A'} {facturaSeleccionada.Comprador?.apellido_paterno || 'N/A'} {facturaSeleccionada.Comprador?.apellido_materno || 'N/A'}</p>
+                  <p>{facturaSeleccionada.Comprador?.correo || 'N/A'}</p>
+                  <p>{facturaSeleccionada.Comprador?.direccion || 'N/A'}</p>
                 </div>
                 <div className="info-grupo" style={{textAlign: 'right'}}>
                   <h4>Detalles de Origen:</h4>
@@ -183,11 +326,7 @@ const Compras = () => {
                       <small style={{color:'#666'}}>Calidad Premium - Frescura Garantizada</small>
                     </td>
                     <td>
-                      {
-                        (parseFloat(facturaSeleccionada.precio_kilo_final) > 0)
-                        ? (parseFloat(facturaSeleccionada.precio_total) / parseFloat(facturaSeleccionada.precio_kilo_final)).toFixed(2)
-                        : '0.00'
-                      } kg
+                      {(parseFloat(facturaSeleccionada.precio_total) / parseFloat(facturaSeleccionada.precio_kilo_final)).toFixed(2)} kg
                     </td>
                     <td>${parseFloat(facturaSeleccionada.precio_kilo_final).toFixed(2)}</td>
                     <td>${parseFloat(facturaSeleccionada.precio_total).toFixed(2)}</td>
@@ -199,22 +338,18 @@ const Compras = () => {
                 <div className="total-line">
                   Total Pagado: ${parseFloat(facturaSeleccionada.precio_total).toFixed(2)}
                 </div>
-                
                 <p style={{marginTop:'30px', fontSize:'0.8rem', fontStyle:'italic', color:'#555'}}>
                   ¡Gracias por su compra! <br/>
-                  Este documento es un comprobante de venta simplificado.
                 </p>
               </div>
             </div>
 
             <div className="modal-actions-factura">
-              <button className="btn-cerrar" onClick={() => setShowModal(false)}>Cerrar</button>
+              <button className="btn-cerrar" onClick={() => setShowModalFactura(false)}>Cerrar</button>
             </div>
-
           </div>
         </div>
       )}
-
     </div>
   );
 };

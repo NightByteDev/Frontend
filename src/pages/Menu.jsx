@@ -8,12 +8,19 @@ const Menu = () => {
   const [usuario, setUsuario] = useState(null);
 
   useEffect(() => {
-    const usuarioGuardado = localStorage.getItem('usuario');
-    if (usuarioGuardado) {
-      setUsuario(JSON.parse(usuarioGuardado));
-    } else {
+  const usuarioGuardado = localStorage.getItem('usuario');
+  const rol = localStorage.getItem('rol');
+
+    if (!usuarioGuardado) {
       navigate('/');
+      return;
     }
+    if (rol !== 'admin') {
+      navigate('/tienda');
+      return;
+    }
+
+  setUsuario(JSON.parse(usuarioGuardado));
   }, [navigate]);
 
   const cerrarSesion = () => {
