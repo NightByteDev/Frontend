@@ -151,6 +151,9 @@ const Home = () => {
 
       <footer className="site-footer">
         <p>{new Date().getFullYear()} Sistema Lonja.</p>
+        <p>Hernández Nolasco Diego Humberto</p>
+        <p>Ortega Enriquez Alejandro</p>
+        <p>Proyecto Final Web 2</p>
       </footer>
     </div>
   );
